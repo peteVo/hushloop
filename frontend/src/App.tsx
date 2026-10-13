@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   ArrowUpRight, AudioLines, BookOpen, Check, Clock3, CloudRain,
   Code2, Coffee, Disc3, Heart, Headphones, History, Leaf,
-  Moon, Pause, Play, Settings2, SkipForward, SlidersHorizontal,
+  Pause, Play, Settings2, SkipForward, SlidersHorizontal,
   Sparkles, Volume2, VolumeX, Waves
 } from "lucide-react";
 import { api, type Track } from "./api";
@@ -135,7 +135,7 @@ export default function App() {
                 <h2>{radio.track?.title ?? "A little room to breathe"}</h2>
                 <div className="track-sub">{radio.track ? radio.track.bpm + " BPM · Instrumental · " + mood.title : "Select an atmosphere and press play"}</div>
                 <div className="track-actions">
-                  <button title={radio.playing ? "Pause" : "Play"} className="main-play" disabled={radio.loading}
+                  <button title={radio.playing ? "Pause" : "Play"} className="main-play"
                     onClick={() => radio.playing || radio.loading ? radio.pause() : void radio.start()}>
                     {radio.loading ? <span className="loader" /> : radio.playing ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
                   </button>
