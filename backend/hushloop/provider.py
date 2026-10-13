@@ -34,7 +34,7 @@ class AceStepProvider:
                 "lyrics": "[Instrumental]",
                 "task_type": "text2music",
                 "thinking": True,
-                "use_cot_caption": True,
+                "use_cot_caption": False,
                 "use_cot_language": False,
                 "use_cot_metas": False,
                 "model": "acestep-v15-turbo",
@@ -150,10 +150,18 @@ def normalize_audio(source: Path, target: Path) -> float:
     try:
         run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
              "-i", str(source), "-vn", "-af",
-             "loudnorm=I=-18:TP=-2:LRA=11", "-ar", "44100", "-ac", "2",
+             "silenceremove=stop_periods=1:stop_duration=1.5:stop_threshold=-45dB,loudnorm=I=-18:TP=-2:LRA=11", "-ar", "44100", "-ac", "2",
              "-codec:a", "libmp3lame", "-q:a", "3", str(temp)])
         if not temp.is_file() or temp.stat().st_size < 8192:
             raise GenerationError("Normalized audio output is invalid")
+        result = run(["ffprobe", "-v", "error", "-show_entries",
+                      "format=duration", "-of", "json", str(temp)])
+        try:
+            duration = float(json.loads(result.stdout)["format"]["duration"])
+        except (ValueError, KeyError, TypeError) as e:
+            raise GenerationError("Invalid normalized audio duration") from e
+        if not 8 <= duration <= 605:
+            raise GenerationError(f"Unexpected normalized duration: {duration}s")
         os.replace(temp, target)
         return duration
     finally:

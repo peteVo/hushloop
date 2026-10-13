@@ -76,16 +76,19 @@ uv sync
 uv run acestep-api
 ~~~
 
-The server defaults to http://127.0.0.1:8001. Check http://127.0.0.1:8001/health first. On a 6–8 GB GPU, ACE-Step recommends its 0.6B language model with the PyTorch backend and CPU offloading. Hushloop uses the local model for caption refinement and audio-code generation, giving ACE-Step more prompt guidance at the cost of slower generation. Set these variables before launching ACE-Step:
+The server defaults to http://127.0.0.1:8001. Check http://127.0.0.1:8001/health first. On a 6–8 GB GPU, ACE-Step recommends its 0.6B language model with the PyTorch backend and CPU offloading. Hushloop uses the local model for audio-code generation while keeping its concise mood prompt unchanged. Set these variables before launching ACE-Step:
 
 ~~~powershell
 $env:ACESTEP_INIT_LLM="true"
 $env:ACESTEP_LM_MODEL_PATH="acestep-5Hz-lm-0.6B"
 $env:ACESTEP_LM_BACKEND="pt"
+$env:ACESTEP_LM_DEVICE="cpu"
+$env:ACESTEP_LM_OFFLOAD_TO_CPU="true"
+$env:ACESTEP_OFFLOAD_TO_CPU="true"
 $env:ACESTEP_OFFLOAD_DIT_TO_CPU="true"
 ~~~
 
-The first run downloads the 0.6B model. Keep `ACESTEP_OFFLOAD_TO_CPU` unset so ACE-Step automatically offloads its text encoder and VAE based on GPU memory. Hushloop still uses the 2B Turbo DiT model and requests one track at a time.
+The first run downloads the 0.6B model. These settings keep the language model on the CPU and offload the audio model between GPU steps to avoid CUDA memory faults on the 8 GB laptop GPU. Generation is slower; the 2B Turbo DiT still uses the GPU for inference, one track at a time.
 
 Stop the Hushloop backend and restart it in AI mode:
 

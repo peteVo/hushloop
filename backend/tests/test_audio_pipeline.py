@@ -23,7 +23,7 @@ class FixtureProvider:
         await asyncio.to_thread(self.write_wav, dest, 9, False)
 
     @staticmethod
-    def write_wav(dest: Path, seconds: int, silent: bool):
+    def write_wav(dest: Path, seconds: int, silent: bool, trailing_silence: int = 0):
         sample_rate = 16000
         with wave.open(str(dest), "wb") as sound:
             sound.setnchannels(1)
@@ -34,7 +34,9 @@ class FixtureProvider:
                 for i in range(offset, min(offset + 4000, seconds * sample_rate)):
                     t = i / sample_rate
                     fade = min(1, t / .1, (seconds - t) / .1)
-                    sample = 0 if silent else int(14000 * fade * math.sin(2 * math.pi * 220 * t))
+                    sample = 0 if silent or t >= seconds - trailing_silence else int(
+                        14000 * fade * math.sin(2 * math.pi * 220 * t)
+                    )
                     frames.extend(struct.pack("<h", sample))
                 sound.writeframesraw(frames)
 
@@ -81,3 +83,14 @@ def test_silent_output_rejected(tmp_path):
     with pytest.raises(GenerationError, match="silent or corrupt"):
         normalize_audio(source, tmp_path / "result.mp3")
     assert not (tmp_path / "result.mp3").exists()
+
+
+@pytest.mark.skipif(
+    not shutil.which("ffmpeg") or not shutil.which("ffprobe"),
+    reason="FFmpeg and ffprobe required to test silence trimming",
+)
+def test_long_trailing_silence_is_trimmed(tmp_path):
+    source = tmp_path / "trailing-silence.wav"
+    FixtureProvider.write_wav(source, 12, False, trailing_silence=3)
+    duration = normalize_audio(source, tmp_path / "result.mp3")
+    assert 8 <= duration < 11

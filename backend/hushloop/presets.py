@@ -5,7 +5,7 @@ import random
 PRESETS = {
     "rainy": {
         "name": "Rainy Café", "bpm": [70, 85],
-        "description": "Lo-fi café instrumental with clearly audible continuous rainfall in the foreground, raindrops pattering against a window throughout, warm Rhodes piano playing rich jazz seventh and ninth chords, upright bass and brushed drums",
+        "description": "Calm instrumental lo-fi jazz groove, steady brushed drums and warm upright bass, a simple repeating Rhodes chord progression with a sparse melody, continuous soft rain pattering on a café window, same relaxed groove throughout",
     },
     "coding": {
         "name": "Midnight Coding", "bpm": [65, 90],
@@ -13,28 +13,19 @@ PRESETS = {
     },
     "jazzhop": {
         "name": "Jazzhop", "bpm": [75, 100],
-        "description": "Distinct jazzhop boom-bap with swung kick, snare and hi-hat, walking upright bass, Rhodes and acoustic piano comping blue notes and rich seventh chords, short muted trumpet and saxophone phrases, dusty vinyl warmth",
+        "description": "Instrumental jazzhop beat with steady swung boom-bap kick and snare, warm walking upright bass, Rhodes playing a repeating jazzy seventh-chord progression, a few short muted trumpet phrases, same groove throughout",
     },
     "ambient": {
         "name": "Ambient Focus", "bpm": [55, 75],
         "description": "Slow evolving ambient pads, soft warm keys, long sustained chords, minimal or no percussion, serene peaceful atmosphere, unobtrusive harmonic motion",
     },
 }
-VARIATIONS = [
-    "gentle tape saturation and soft high-end",
-    "understated melodic phrasing and spacious arrangement",
-    "subtle harmonic variation and delicate dynamics",
-    "warm organic instrumentation and rounded transients",
-    "restrained improvisation with consistent relaxed groove",
-]
-
 def create_prompt(mood: str) -> tuple[str, int]:
     preset = PRESETS[mood]
     bpm = random.randint(*preset["bpm"])
     prompt = (
         f"{preset['description']}, "
-        f"{random.choice(VARIATIONS)}. {bpm} BPM. "
-        "No vocals, no singing, no spoken words, no dramatic drops, "
-        "no abrupt changes. Soft dynamics, suitable for concentration."
+        f"{bpm} BPM. Keep the same arrangement, harmony and rhythm throughout. "
+        "No vocals, breaks, fills or transitions."
     )
     return prompt, bpm

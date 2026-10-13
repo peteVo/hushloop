@@ -69,7 +69,9 @@ def test_presets():
 def test_rainy_and_jazzhop_prompts_name_their_audible_signatures():
     rainy, _ = create_prompt("rainy")
     jazzhop, _ = create_prompt("jazzhop")
-    assert "continuous rainfall" in rainy and "foreground" in rainy
-    assert "jazzhop boom-bap" in jazzhop and "upright bass" in jazzhop
-    assert "muted trumpet and saxophone" in jazzhop
+    assert "continuous soft rain" in rainy and "repeating Rhodes chord progression" in rainy
+    assert "jazzhop beat" in jazzhop and "walking upright bass" in jazzhop
+    assert "muted trumpet phrases" in jazzhop
+    assert "same arrangement, harmony and rhythm throughout" in rainy
+    assert "same arrangement, harmony and rhythm throughout" in jazzhop
     assert len(rainy) <= 512 and len(jazzhop) <= 512
