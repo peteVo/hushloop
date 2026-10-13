@@ -4,7 +4,7 @@
 
 A local-first, queue-based AI instrumental lo-fi radio for Windows, designed for everyday studying and coding. Hushloop runs a lightweight React music player and a Python scheduler alongside a **separate ACE-Step 1.5 local inference server**.
 
-> **Status: early functional MVP.** Backend generation, normalization, SQLite queueing, radio controls and mood selection are implemented. The synthetic demo mode is *not* AI-generated music. Actual ACE-Step inference on RTX 5070 Ti, crossfade listening quality, long-running playback and Windows packaging still require testing on the target PC. Do not interpret source code or CI passes as completed hardware validation.
+> **Status: early functional MVP.** Backend generation, normalization, SQLite queueing, radio controls and mood selection are implemented. The synthetic demo mode is *not* AI-generated music. Actual ACE-Step inference, crossfade listening quality, long-running playback and Windows packaging still need validation on the target PC.
 
 ## How it works
 
@@ -76,7 +76,7 @@ uv sync
 uv run acestep-api
 ~~~
 
-Upstream also provides Windows launcher scripts, such as \`start_api_server.bat\`. The server defaults to http://127.0.0.1:8001. Check http://127.0.0.1:8001/health first. The first run may download large model weights. The upstream 2B turbo model is the default in Hushloop; Hushloop sends \`thinking=false\` to avoid needing the separate 5Hz language model initially. Tune ACE-Step itself for your available 16GB VRAM.
+Upstream also provides Windows launcher scripts, such as \`start_api_server.bat\`. The server defaults to http://127.0.0.1:8001. Check http://127.0.0.1:8001/health first. The first run may download large model weights. Hushloop uses ACE-Step's 2B Turbo model and sends \`thinking=false\`. On an 8 GB laptop GPU, start with ACE-Step's LLM disabled (\`ACESTEP_INIT_LLM=false\`) to leave VRAM for generation; consider its 0.6B language model with the PyTorch backend only after confirming available memory.
 
 Stop the Hushloop backend and restart it in AI mode:
 

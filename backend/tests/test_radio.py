@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 from fastapi.testclient import TestClient
 from hushloop.app import create_app
@@ -8,6 +9,12 @@ class Noop:
     name = "Noop"
     async def generate(self, *args):
         raise AssertionError("Should not generate unless enabled")
+
+class FailingProvider:
+    name = "Unavailable inference server"
+
+    async def generate(self, *args):
+        raise RuntimeError("inference server unavailable")
 
 def test_default_off_and_settings(tmp_path):
     with TestClient(create_app(tmp_path, Noop())) as client:
@@ -40,6 +47,20 @@ def test_queue_rotation_and_feedback(tmp_path):
     store.played("id2")
     assert store.next("rainy", exclude="id0")["id"] == "id2"
     assert store.next("rainy", exclude="id2")["id"] == "id0"
+
+def test_cached_track_remains_available_when_generation_fails(tmp_path):
+    with TestClient(create_app(tmp_path, FailingProvider())) as client:
+        runtime = client.app.state.runtime
+        runtime.store.add(dict(
+            id="cachedtrack00000000000000000000", mood="rainy", title="Cached",
+            prompt="lofi", bpm=75, duration=90, filename="cached.mp3", created_at=1,
+        ))
+        client.post("/api/settings", json={"generation_enabled": True})
+        deadline = time.monotonic() + 3
+        while runtime.last_error is None and time.monotonic() < deadline:
+            time.sleep(.01)
+        assert runtime.last_error == "inference server unavailable"
+        assert client.get("/api/tracks/next").json()["id"] == "cachedtrack00000000000000000000"
 
 def test_presets():
     for item in PRESETS.values():
