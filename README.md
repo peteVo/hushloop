@@ -76,7 +76,16 @@ uv sync
 uv run acestep-api
 ~~~
 
-Upstream also provides Windows launcher scripts, such as \`start_api_server.bat\`. The server defaults to http://127.0.0.1:8001. Check http://127.0.0.1:8001/health first. The first run may download large model weights. Hushloop uses ACE-Step's 2B Turbo model and sends \`thinking=false\`. On an 8 GB laptop GPU, start with ACE-Step's LLM disabled (\`ACESTEP_INIT_LLM=false\`) to leave VRAM for generation; consider its 0.6B language model with the PyTorch backend only after confirming available memory.
+The server defaults to http://127.0.0.1:8001. Check http://127.0.0.1:8001/health first. On a 6–8 GB GPU, ACE-Step recommends its 0.6B language model with the PyTorch backend and CPU offloading. Hushloop uses the local model for caption refinement and audio-code generation, giving ACE-Step more prompt guidance at the cost of slower generation. Set these variables before launching ACE-Step:
+
+~~~powershell
+$env:ACESTEP_INIT_LLM="true"
+$env:ACESTEP_LM_MODEL_PATH="acestep-5Hz-lm-0.6B"
+$env:ACESTEP_LM_BACKEND="pt"
+$env:ACESTEP_OFFLOAD_DIT_TO_CPU="true"
+~~~
+
+The first run downloads the 0.6B model. Keep `ACESTEP_OFFLOAD_TO_CPU` unset so ACE-Step automatically offloads its text encoder and VAE based on GPU memory. Hushloop still uses the 2B Turbo DiT model and requests one track at a time.
 
 Stop the Hushloop backend and restart it in AI mode:
 

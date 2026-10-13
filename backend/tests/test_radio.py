@@ -2,7 +2,7 @@ import time
 from pathlib import Path
 from fastapi.testclient import TestClient
 from hushloop.app import create_app
-from hushloop.presets import PRESETS
+from hushloop.presets import PRESETS, create_prompt
 from hushloop.store import Store
 
 class Noop:
@@ -65,3 +65,11 @@ def test_cached_track_remains_available_when_generation_fails(tmp_path):
 def test_presets():
     for item in PRESETS.values():
         assert item["bpm"][0] < item["bpm"][1]
+
+def test_rainy_and_jazzhop_prompts_name_their_audible_signatures():
+    rainy, _ = create_prompt("rainy")
+    jazzhop, _ = create_prompt("jazzhop")
+    assert "continuous rainfall" in rainy and "foreground" in rainy
+    assert "jazzhop boom-bap" in jazzhop and "upright bass" in jazzhop
+    assert "muted trumpet and saxophone" in jazzhop
+    assert len(rainy) <= 512 and len(jazzhop) <= 512
