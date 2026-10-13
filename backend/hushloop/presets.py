@@ -9,7 +9,7 @@ PRESETS = {
     },
     "coding": {
         "name": "Midnight Coding", "bpm": [65, 90],
-        "description": "Minimal drifting Rhodes melody, deep rounded bass, featherlight percussion, restrained atmospheric analog synthesizers, steady repetitive groove, spacious calm arrangement",
+        "description": "Clear repeating mid-register electric piano melody in the foreground, warm Rhodes chords, soft featherlight percussion, quiet bass supporting the harmony, restrained atmospheric synthesizers, steady spacious groove",
     },
     "jazzhop": {
         "name": "Jazzhop", "bpm": [75, 100],

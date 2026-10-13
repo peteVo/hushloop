@@ -75,3 +75,8 @@ def test_rainy_and_jazzhop_prompts_name_their_audible_signatures():
     assert "same arrangement, harmony and rhythm throughout" in rainy
     assert "same arrangement, harmony and rhythm throughout" in jazzhop
     assert len(rainy) <= 512 and len(jazzhop) <= 512
+
+def test_coding_prompt_prioritizes_melody_over_bass():
+    coding, _ = create_prompt("coding")
+    assert "electric piano melody in the foreground" in coding
+    assert "quiet bass supporting the harmony" in coding
