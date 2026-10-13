@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, type Status, type Track } from "./api";
+import { crossfadeCurves } from "./crossfade.js";
 
 type Slot = { audio: HTMLAudioElement; gain: GainNode; track: Track };
 
@@ -112,14 +113,16 @@ export function useRadio() {
     try {
       const ctx = getContext();
       await ctx.resume();
-      next.gain.gain.setValueAtTime(0, ctx.currentTime);
       await next.audio.play();
       const seconds = Math.max(0, Math.min(fadeSeconds, old.audio.duration - old.audio.currentTime || 0));
-      next.gain.gain.setValueAtTime(0, ctx.currentTime);
-      next.gain.gain.linearRampToValueAtTime(1, ctx.currentTime + seconds);
-      old.gain.gain.cancelScheduledValues(ctx.currentTime);
-      old.gain.gain.setValueAtTime(old.gain.gain.value, ctx.currentTime);
-      old.gain.gain.linearRampToValueAtTime(0, ctx.currentTime + seconds);
+      if (seconds === 0) {
+        next.gain.gain.value = 1;
+        old.gain.gain.value = 0;
+      } else {
+        const { fadeIn, fadeOut } = crossfadeCurves();
+        next.gain.gain.setValueCurveAtTime(fadeIn, ctx.currentTime, seconds);
+        old.gain.gain.setValueCurveAtTime(fadeOut, ctx.currentTime, seconds);
+      }
       current.current = next;
       fading.current = old;
       setTrack(next.track);
