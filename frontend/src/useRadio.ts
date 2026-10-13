@@ -146,7 +146,7 @@ export function useRadio() {
     try {
       const ctx = getContext();
       await ctx.resume();
-      await api.settings({ generation_enabled: true });
+      if (!current.current) await api.settings({ generation_enabled: true });
       if (current.current) {
         await Promise.all([current.current, fading.current].filter((s): s is Slot => !!s).map(s => s.audio.play()));
         playingRef.current = true;
