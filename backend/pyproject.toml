@@ -19,3 +19,6 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["hushloop*"]
+
+[tool.setuptools.package-data]
+hushloop = ["assets/*"]

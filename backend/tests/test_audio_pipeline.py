@@ -60,8 +60,9 @@ def test_generation_serving_and_feedback(tmp_path):
             if response.status_code == 200:
                 item = response.json()
                 break
-            time.sleep(.25)
+            time.sleep(.01)
         assert item is not None, client.get("/api/status").json()
+        assert client.post("/api/settings", json={"generation_enabled": False}).status_code == 200
         assert 8 <= item["duration"] <= 10
         response = client.get(item["url"])
         assert response.status_code == 200
@@ -102,9 +103,10 @@ def test_long_trailing_silence_is_trimmed(tmp_path):
     not shutil.which("ffmpeg") or not shutil.which("ffprobe"),
     reason="FFmpeg and ffprobe required to test the Rainy Café mix",
 )
-def test_rain_layer_is_present_in_high_frequencies(tmp_path):
+def test_recorded_rain_layer_is_present_in_high_frequencies(tmp_path):
     source = tmp_path / "music.wav"
     target = tmp_path / "rainy.mp3"
+    assert (Path(__file__).parents[1] / "hushloop" / "assets" / "rain-loop.mp3").is_file()
     FixtureProvider.write_wav(source, 9, False)
     normalize_audio(source, target, rain=True)
     scan = subprocess.run(
