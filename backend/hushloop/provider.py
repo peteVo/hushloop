@@ -157,7 +157,7 @@ def normalize_audio(source: Path, target: Path, rain: bool = False) -> float:
             args += ["-stream_loop", "-1", "-i", str(rain_source),
                      "-filter_complex",
                      "[0:a]silenceremove=stop_periods=1:stop_duration=1.5:stop_threshold=-45dB[music];"
-                     "[1:a]volume=0.4[rain];"
+                     "[1:a]volume=0.2[rain];"
                      "[music][rain]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,"
                      "loudnorm=I=-18:TP=-2:LRA=11"]
         else:
