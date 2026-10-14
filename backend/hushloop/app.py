@@ -56,7 +56,7 @@ class Runtime:
                 prompt, bpm = create_prompt(mood)
                 try:
                     await self.provider.generate(source, prompt, bpm, conf["track_seconds"])
-                    duration = await asyncio.to_thread(normalize_audio, source, target)
+                    duration = await asyncio.to_thread(normalize_audio, source, target, mood == "rainy")
                     self.store.add({
                         "id": identifier, "mood": mood,
                         "title": f"{PRESETS[mood]['name']} · {time.strftime('%H:%M')}",

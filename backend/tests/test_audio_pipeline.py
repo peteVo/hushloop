@@ -3,8 +3,10 @@ from __future__ import annotations
 
 import asyncio
 import math
+import re
 import shutil
 import struct
+import subprocess
 import time
 import wave
 from pathlib import Path
@@ -94,3 +96,21 @@ def test_long_trailing_silence_is_trimmed(tmp_path):
     FixtureProvider.write_wav(source, 12, False, trailing_silence=3)
     duration = normalize_audio(source, tmp_path / "result.mp3")
     assert 8 <= duration < 11
+
+
+@pytest.mark.skipif(
+    not shutil.which("ffmpeg") or not shutil.which("ffprobe"),
+    reason="FFmpeg and ffprobe required to test the Rainy Café mix",
+)
+def test_rain_layer_is_present_in_high_frequencies(tmp_path):
+    source = tmp_path / "music.wav"
+    target = tmp_path / "rainy.mp3"
+    FixtureProvider.write_wav(source, 9, False)
+    normalize_audio(source, target, rain=True)
+    scan = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-i", str(target), "-af",
+         "highpass=f=3000,volumedetect", "-f", "null", "NUL"],
+        capture_output=True, text=True, check=True,
+    )
+    match = re.search(r"mean_volume:\s*(-?\d+(?:\.\d+)?)\s*dB", scan.stderr)
+    assert match and float(match.group(1)) > -55

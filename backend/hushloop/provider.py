@@ -118,7 +118,7 @@ class MockProvider:
                     frames.extend(struct.pack("<h", sample))
                 wav.writeframesraw(frames)
 
-def normalize_audio(source: Path, target: Path) -> float:
+def normalize_audio(source: Path, target: Path, rain: bool = False) -> float:
     """Validate input and encode loudness-normalized MP3 atomically."""
     import subprocess
     def run(args):
@@ -148,10 +148,21 @@ def normalize_audio(source: Path, target: Path) -> float:
         raise GenerationError("Generated audio is silent or corrupt")
     temp = target.with_suffix(".partial.mp3")
     try:
-        run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-             "-i", str(source), "-vn", "-af",
-             "silenceremove=stop_periods=1:stop_duration=1.5:stop_threshold=-45dB,loudnorm=I=-18:TP=-2:LRA=11", "-ar", "44100", "-ac", "2",
-             "-codec:a", "libmp3lame", "-q:a", "3", str(temp)])
+        args = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+                "-i", str(source), "-vn"]
+        if rain:
+            args += ["-f", "lavfi", "-t", str(duration), "-i",
+                     "anoisesrc=color=white:amplitude=0.2:sample_rate=44100",
+                     "-filter_complex",
+                     "[0:a]silenceremove=stop_periods=1:stop_duration=1.5:stop_threshold=-45dB[music];"
+                     "[1:a]highpass=f=650,lowpass=f=10000,volume=0.2[rain];"
+                     "[music][rain]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,"
+                     "loudnorm=I=-18:TP=-2:LRA=11"]
+        else:
+            args += ["-af",
+                     "silenceremove=stop_periods=1:stop_duration=1.5:stop_threshold=-45dB,loudnorm=I=-18:TP=-2:LRA=11"]
+        args += ["-ar", "44100", "-ac", "2", "-codec:a", "libmp3lame", "-q:a", "3", str(temp)]
+        run(args)
         if not temp.is_file() or temp.stat().st_size < 8192:
             raise GenerationError("Normalized audio output is invalid")
         result = run(["ffprobe", "-v", "error", "-show_entries",
